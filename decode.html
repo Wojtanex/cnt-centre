@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Decode CNT Code</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    input {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+      width: 300px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #decoded-output {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Decode CNT Code</h1>
+  <p>Paste your code below to decode the wallet information and CNT amount.</p>
+  <input type="text" id="encoded-code" placeholder="Enter your encoded code" />
+  <button id="decode-btn">Decode</button>
+  <div id="decoded-output"></div>
+
+  <script>
+    function decodeCode(encodedCode) {
+      try {
+        const decodedData = atob(encodedCode); // Dekodowanie Base64
+        const data = JSON.parse(decodedData); // Parsowanie JSON
+        return `Wallet: ${data.wallet}, CNT Amount: ${data.amount}`;
+      } catch (error) {
+        return "Invalid code!";
+      }
+    }
+
+    document.getElementById("decode-btn").addEventListener("click", () => {
+      const encodedCode = document.getElementById("encoded-code").value.trim();
+      const output = decodeCode(encodedCode);
+      document.getElementById("decoded-output").innerText = output;
+    });
+  </script>
+</body>
+</html>

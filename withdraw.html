@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Withdrawal Confirmation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    #confirmation {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Withdrawal Confirmation</h1>
+  <div id="confirmation">
+    <p>Processing withdrawal...</p>
+    <p id="withdraw-info"></p>
+  </div>
+
+  <script>
+    // Funkcja do pobrania parametrów z URL
+    function getQueryParams() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const address = urlParams.get('address');
+      const amount = urlParams.get('amount');
+      return { address, amount };
+    }
+
+    // Wyświetlanie informacji o wypłacie
+    window.onload = function() {
+      const { address, amount } = getQueryParams();
+      const withdrawInfoElement = document.getElementById('withdraw-info');
+      
+      if (address && amount) {
+        withdrawInfoElement.innerHTML = `Successfully initiated withdrawal of ${amount} CNT to wallet address: <strong>${address}</strong>.`;
+      } else {
+        withdrawInfoElement.innerHTML = 'Invalid withdrawal data.';
+      }
+    };
+  </script>
+</body>
+</html>
