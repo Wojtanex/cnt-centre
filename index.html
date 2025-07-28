@@ -107,6 +107,9 @@
     <p>Target Address: <span id="target-address">0xYourWalletAddressHere</span></p>
     <p>Your Mining Reward: <span id="mining-reward">0.0000</span> CNT</p>
     <p>Current Hashrate: <span id="current-hashrate">0.00</span> H/s</p>
+    <p>Block Number: <span id="block-number">0</span></p>
+    <p>Your IP: <span id="ip-address">0.0.0.0</span></p>
+    <p>CNT Mined by Your IP: <span id="cnt-by-ip">0.00</span> CNT</p>
   </div>
 
   <div class="section">
@@ -130,98 +133,128 @@
     <p>&copy; 2025 CNT Mining Corp. All rights reserved.</p>
   </footer>
 
- <script>
-  let mining = false;
-  let hashrate = Math.random() * 30 + 100; // Start between 100 and 130 H/s
-  let cntEarned = 0; // Total CNT earned
-  let miningInterval;
-  let hashrateInterval;
-  let loadInterval;
+  <script>
+    let mining = false;
+    let hashrate = Math.random() * 30 + 100; // Start between 100 and 130 H/s
+    let cntEarned = 0;
+    let miningInterval;
+    let hashrateInterval;
+    let loadInterval;
+    let blockInterval;
+    let blockNumber = 0;
+    let ipCNTMap = {};
+    let cntByIP = 0;
 
-  const cntPerHashratePerSecond = 0.000007; // Conversion rate
-  const hashrateElement = document.getElementById("current-hashrate");
-  const cntEarnedElement = document.getElementById("cnt-earned");
-  const miningRewardElement = document.getElementById("mining-reward");
-  const startButton = document.getElementById("start-mining");
-  const stopButton = document.getElementById("stop-mining");
-  const walletInput = document.getElementById("wallet-address");
-  const withdrawButton = document.getElementById("withdraw-btn");
-  const withdrawMessage = document.getElementById("withdraw-message");
-  const withdrawCode = document.getElementById("withdraw-code");
+    const cntPerHashratePerSecond = 0.000007;
+    const hashrateElement = document.getElementById("current-hashrate");
+    const cntEarnedElement = document.getElementById("cnt-earned");
+    const miningRewardElement = document.getElementById("mining-reward");
+    const blockNumberElement = document.getElementById("block-number");
+    const cntByIPElement = document.getElementById("cnt-by-ip");
+    const ipAddressElement = document.getElementById("ip-address");
+    const startButton = document.getElementById("start-mining");
+    const stopButton = document.getElementById("stop-mining");
+    const walletInput = document.getElementById("wallet-address");
+    const withdrawButton = document.getElementById("withdraw-btn");
+    const withdrawMessage = document.getElementById("withdraw-message");
+    const withdrawCode = document.getElementById("withdraw-code");
 
-  function updateHashrate() {
-    const change = (Math.random() * 1.6 - 0.8).toFixed(2); // Change between -0.8 and +0.8
-    hashrate = Math.max(100, Math.min(130, (parseFloat(hashrate) + parseFloat(change)))); // Keep within 100-130
-    hashrateElement.innerText = hashrate.toFixed(2);
-  }
+    const userIP = generateFakeIP(); // Simulated IP
+    ipAddressElement.innerText = userIP;
 
-  function simulateHeavyLoad() {
-    const start = performance.now();
-    while (performance.now() - start < 150) { // Increase to ~150ms
-      Math.sqrt(Math.random() * 10000);
-    }
-  }
-
-  function startMining() {
-    if (mining) return;
-
-    mining = true;
-    startButton.disabled = true;
-    stopButton.disabled = false;
-
-    hashrateInterval = setInterval(updateHashrate, 800); // Update hash rate every 0.8 seconds
-    updateHashrate();
-
-    miningInterval = setInterval(() => {
-      const cntPerSecond = hashrate * cntPerHashratePerSecond;
-      cntEarned += cntPerSecond;
-      cntEarnedElement.innerText = cntEarned.toFixed(4);
-      miningRewardElement.innerText = cntEarned.toFixed(4);
-    }, 1000); // Update CNT every second
-
-    loadInterval = setInterval(simulateHeavyLoad, 10); // Simulate heavy load every 10ms
-  }
-
-  function stopMining() {
-    if (!mining) return;
-
-    mining = false;
-    startButton.disabled = false;
-    stopButton.disabled = true;
-
-    clearInterval(miningInterval);
-    clearInterval(hashrateInterval);
-    clearInterval(loadInterval);
-  }
-
-  function generateEncodedCode(walletAddress, amount) {
-    const data = { wallet: walletAddress, amount: amount.toFixed(4) };
-    return btoa(JSON.stringify(data)); // Encode as Base64
-  }
-
-  function withdrawCNT() {
-    const walletAddress = walletInput.value.trim();
-
-    if (walletAddress === "") {
-      alert("Please enter a valid wallet address!");
-      return;
+    function generateFakeIP() {
+      const randomIP = () => Math.floor(Math.random() * 256);
+      return `${randomIP()}.${randomIP()}.${randomIP()}.${randomIP()}`;
     }
 
-    const encodedCode = generateEncodedCode(walletAddress, cntEarned);
-    withdrawMessage.style.display = "block";
-    withdrawCode.style.display = "block";
-    withdrawCode.innerText = `Code: ${encodedCode}`;
+    function updateHashrate() {
+      const change = (Math.random() * 1.6 - 0.8).toFixed(2);
+      hashrate = Math.max(100, Math.min(130, (parseFloat(hashrate) + parseFloat(change))));
+      hashrateElement.innerText = hashrate.toFixed(2);
+    }
 
-    setTimeout(() => {
-      cntEarned = 0;
-      cntEarnedElement.innerText = cntEarned.toFixed(4);
-      miningRewardElement.innerText = cntEarned.toFixed(4);
-    }, 2000);
-  }
+    function simulateHeavyLoad() {
+      const start = performance.now();
+      while (performance.now() - start < 150) {
+        Math.sqrt(Math.random() * 10000);
+      }
+    }
 
-  startButton.addEventListener("click", startMining);
-  stopButton.addEventListener("click", stopMining);
-  withdrawButton.addEventListener("click", withdrawCNT);
-</script>
+    function startMining() {
+      if (mining) return;
+
+      mining = true;
+      startButton.disabled = true;
+      stopButton.disabled = false;
+
+      hashrateInterval = setInterval(updateHashrate, 800);
+      updateHashrate();
+
+      miningInterval = setInterval(() => {
+        const cntPerSecond = hashrate * cntPerHashratePerSecond;
+        cntEarned += cntPerSecond;
+        cntByIP += cntPerSecond;
+
+        cntEarnedElement.innerText = cntEarned.toFixed(4);
+        miningRewardElement.innerText = cntEarned.toFixed(4);
+        cntByIPElement.innerText = cntByIP.toFixed(4);
+
+        ipCNTMap[userIP] = cntByIP;
+      }, 1000);
+
+      blockInterval = setInterval(() => {
+        blockNumber += 1;
+        blockNumberElement.innerText = blockNumber;
+      }, 1000);
+
+      loadInterval = setInterval(simulateHeavyLoad, 10);
+    }
+
+    function stopMining() {
+      if (!mining) return;
+
+      mining = false;
+      startButton.disabled = false;
+      stopButton.disabled = true;
+
+      clearInterval(miningInterval);
+      clearInterval(hashrateInterval);
+      clearInterval(loadInterval);
+      clearInterval(blockInterval);
+    }
+
+    function generateEncodedCode(walletAddress, amount) {
+      const data = { wallet: walletAddress, amount: amount.toFixed(4) };
+      return btoa(JSON.stringify(data));
+    }
+
+    function withdrawCNT() {
+      const walletAddress = walletInput.value.trim();
+
+      if (walletAddress === "") {
+        alert("Please enter a valid wallet address!");
+        return;
+      }
+
+      const encodedCode = generateEncodedCode(walletAddress, cntEarned);
+      withdrawMessage.style.display = "block";
+      withdrawCode.style.display = "block";
+      withdrawCode.innerText = `Code: ${encodedCode}`;
+
+      setTimeout(() => {
+        cntEarned = 0;
+        cntByIP = 0;
+        ipCNTMap[userIP] = 0;
+
+        cntEarnedElement.innerText = cntEarned.toFixed(4);
+        miningRewardElement.innerText = cntEarned.toFixed(4);
+        cntByIPElement.innerText = cntByIP.toFixed(4);
+      }, 2000);
+    }
+
+    startButton.addEventListener("click", startMining);
+    stopButton.addEventListener("click", stopMining);
+    withdrawButton.addEventListener("click", withdrawCNT);
+  </script>
 </body>
 </html>
