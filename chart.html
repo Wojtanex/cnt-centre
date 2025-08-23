@@ -204,10 +204,11 @@
         }
 
         function toggleChart() {
-            chartType = chartType === "line" ? "candlestick" : "line";
-            myChart.destroy();
-            createChart();
-        }
+    chartType = chartType === "line" ? "bar" : "line";
+    myChart.destroy();
+    createChart();
+}
+
 
         createChart();
     </script>
