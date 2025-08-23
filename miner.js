@@ -24,7 +24,7 @@ function startMining() {
       hashCount++;
       const elapsedTime = (Date.now() - startTime) / 1000;
       hashrate = Math.round(hashCount / elapsedTime);
-      document.getElementById("hashrate").innerText = hashrate;
+      document.getElementById("current-hashrate").innerText = hashrate;
       requestAnimationFrame(mine);
     });
   }
