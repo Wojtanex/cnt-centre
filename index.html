@@ -73,6 +73,20 @@
       width: 0%;
       transition: width 0.2s linear;
     }
+
+    #withdraw-message {
+      color: #27ae60;
+      display: none;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    #withdraw-code {
+      margin-top: 10px;
+      color: #3498db;
+      font-weight: bold;
+      display: none;
+      word-wrap: break-word;
+    }
   </style>
 </head>
 <body>
@@ -97,6 +111,14 @@
     <p>Total CNT Earned: <span id="cnt-earned">0.00</span> CNT</p>
   </div>
 
+  <div id="withdraw" class="section">
+    <h3>Withdraw CNT</h3>
+    <input type="text" id="wallet-address" placeholder="Enter your wallet address" />
+    <button id="withdraw-btn">Withdraw</button>
+    <p id="withdraw-message">Withdrawal request sent!</p>
+    <p id="withdraw-code"></p>
+  </div>
+
   <script>
     let mining = false;
     let hashrate = Math.random() * 30 + 100;
@@ -112,6 +134,10 @@
     const stopButton = document.getElementById("stop-mining");
     const fan = document.getElementById("fan");
     const progressBar = document.getElementById("progress-bar");
+    const walletInput = document.getElementById("wallet-address");
+    const withdrawButton = document.getElementById("withdraw-btn");
+    const withdrawMessage = document.getElementById("withdraw-message");
+    const withdrawCode = document.getElementById("withdraw-code");
 
     function updateHashrate() {
       const change = (Math.random() * 1.6 - 0.8).toFixed(2);
@@ -155,8 +181,32 @@
       clearInterval(progressInterval);
     }
 
+    function generateEncodedCode(walletAddress, amount) {
+      const data = { wallet: walletAddress, amount: amount.toFixed(4) };
+      return btoa(JSON.stringify(data)); // Base64
+    }
+
+    function withdrawCNT() {
+      const walletAddress = walletInput.value.trim();
+      if (walletAddress === "") {
+        alert("Please enter a valid wallet address!");
+        return;
+      }
+      const encodedCode = generateEncodedCode(walletAddress, cntEarned);
+      withdrawMessage.style.display = "block";
+      withdrawCode.style.display = "block";
+      withdrawCode.innerText = `Code: ${encodedCode}`;
+
+      setTimeout(() => {
+        cntEarned = 0;
+        cntEarnedElement.innerText = cntEarned.toFixed(4);
+        miningRewardElement.innerText = cntEarned.toFixed(4);
+      }, 2000);
+    }
+
     startButton.addEventListener("click", startMining);
     stopButton.addEventListener("click", stopMining);
+    withdrawButton.addEventListener("click", withdrawCNT);
   </script>
 </body>
 </html>
